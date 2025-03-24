@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图书管理系统 - 用户面板</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_admin.css') }}">
+</head>
+<body>
+    <!-- Sidebar navigation -->
+    <div class="sidebar">
+        <div class="logo">
+            <h2>图书管理系统</h2>
+            <p>用户面板</p>
+        </div>
+        
+        <div class="nav-links">
+            <a href="#" class="nav-link active" data-section="book-search">
+                <i>🔍</i>
+                <span>图书查询</span>
+            </a>
+            <a href="#" class="nav-link" data-section="borrow-book">
+                <i>📖</i>
+                <span>借书</span>
+            </a>
+            <a href="#" class="nav-link" data-section="return-book">
+                <i>📚</i>
+                <span>还书</span>
+            </a>
+            
+            <div class="logout">
+                <a href="{{ url_for('logout') }}" class="nav-link">
+                    <i>🚪</i>
+                    <span>退出登录</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main content area -->
+    <div class="main-content">
+        <div class="header">
+            <h1>欢迎回来，用户</h1>
+            <div class="date-time" id="datetime"></div>
+        </div>
+        
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- 图书查询 -->
+            <div class="section active" id="book-search">
+                <h2>图书查询</h2>
+                <br>
+                <form action="{{ url_for('search') }}" method="POST">
+                    <div class="search-bar">
+                        <input type="text" id="search-title" name="title" placeholder="书名" class="narrow-input">
+                        <input type="text" id="search-author" name="author" placeholder="作者" class="narrow-input">
+                        <input type="text" id="search-category" name="category" placeholder="类别" class="narrow-input">
+                        <input type="text" id="search-publisher" name="publisher" placeholder="出版社" class="narrow-input">
+                        <input type="number" id="year-start" name="year_start" placeholder="起始年份" class="narrow-input">
+                        <input type="number" id="year-end" name="year_end" placeholder="结束年份" class="narrow-input">
+                        <input type="number" step="0.01" id="price-min" name="price_min" placeholder="最低价格" class="narrow-input">
+                        <input type="number" step="0.01" id="price-max" name="price_max" placeholder="最高价格" class="narrow-input">
+                        <select id="sort-by" name="sort_by">
+                            <option value="book_id">书号</option>
+                            <option value="title">按书名排序</option>
+                            <option value="category">按类别排序</option>
+                            <option value="publisher">按出版社排序</option>
+                            <option value="year">按年份排序</option>
+                            <option value="author">按作者排序</option>
+                            <option value="price">按价格排序</option>
+                        </select>
+                        <p>&ensp;&ensp;</p>  
+                        <select id="order_by" name="order_by">
+                            <option value="asc">递增</option>
+                            <option value="desc">递减</option>
+                        </select>
+                        <button type="button" id="search_button" name="is_search" value="true">🔍</button>
+                    </div>
+                
+                    <div class="card">
+                        <h3>查询结果</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>书号</th>
+                                    <th>类别</th>
+                                    <th>书名</th>
+                                    <th>出版社</th>
+                                    <th>年份</th>
+                                    <th>作者</th>
+                                    <th>价格</th>
+                                    <th>总藏书量</th>
+                                    <th>库存</th>
+                                </tr>
+                            </thead>
+                            <tbody id="books-table-body">
+                                <!-- 动态加载数据 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- 借书 -->
+            <div class="section" id="borrow-book">
+                <h2>已借书籍查询</h2>
+                <br>
+                <form action="{{ url_for('borrow') }}" method="post">
+                    <input type="hidden" name="search_borrowered_books" value="true">
+                    <div class="search-bar">
+                        <input type="text" id="search-id" placeholder="输入借书证卡号" name="card_id">
+                        <select id="sort-by" name="sort_by">
+                            <option value="book_id">书号</option>
+                            <option value="title">书名</option>
+                            <option value="author">作者</option>
+                            <option value="press">出版社</option>
+                            <option value="year">年份</option>
+                            <option value="price">价格</option>
+                            <option value="total_nums">总藏书量</option>
+                            <option value="stock">库存</option>
+                        </select>
+                        <select id="order_by" name="order_by">
+                            <option value="asc">递增</option>
+                            <option value="desc">递减</option>
+                        </select>
+                        <button type="button" id="search_button_borrow" name="is_search" value="true">🔍</button>
+                    </div>
+                    <div class="card">
+                        <h3>查询结果</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>书号</th>
+                                    <th>类别</th>
+                                    <th>书名</th>
+                                    <th>出版社</th>
+                                    <th>年份</th>
+                                    <th>作者</th>
+                                    <th>价格</th>
+                                    <th>总藏书量</th>
+                                    <th>库存</th>
+                                </tr>
+                            </thead>
+                            <tbody id="borrowered-books-table-body">
+                                <!-- Data will be loaded here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+
+                <h2>借书</h2>
+                <br>
+                <div class="card">
+                    <h3>借书操作</h3>
+                    <form action="{{ url_for('borrow') }}" method="post">
+                        <input type="hidden" name="borrow_book" value="true">
+                        <div class="form-group">
+                            <label for="card-id">借书证卡号</label>
+                            <input type="text" id="card-id" name="card_id" placeholder="请输入借书证卡号" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="book-id">书号</label>
+                            <input type="text" id="book-id" name="book_id" placeholder="请输入图书编号" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">借书</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- 还书 -->
+            <div class="section" id="return-book">
+                <h2>已借书籍查询</h2>
+                <br>
+                <form action="{{ url_for('returns') }}" method="post">
+                    <input type="hidden" name="search_borrowered_books" value="true">
+                    <div class="search-bar">
+                        <input type="text" id="search-id-returns" placeholder="输入借书证卡号" name="card_id">
+                        <select id="sort-by-returns" name="sort_by">
+                            <option value="book_id">书号</option>
+                            <option value="title">书名</option>
+                            <option value="author">作者</option>
+                            <option value="press">出版社</option>
+                            <option value="year">年份</option>
+                            <option value="price">价格</option>
+                            <option value="total_nums">总藏书量</option>
+                            <option value="stock">库存</option>
+                        </select>
+                        <select id="order-by-returns" name="order_by">
+                            <option value="asc">递增</option>
+                            <option value="desc">递减</option>
+                        </select>
+                        <button type="button" id="search_button_borrow_returns" name="is_search" value="true">🔍</button>
+                    </div>
+                    <div class="card">
+                        <h3>查询结果</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>书号</th>
+                                    <th>类别</th>
+                                    <th>书名</th>
+                                    <th>出版社</th>
+                                    <th>年份</th>
+                                    <th>作者</th>
+                                    <th>价格</th>
+                                    <th>总藏书量</th>
+                                    <th>库存</th>
+                                </tr>
+                            </thead>
+                            <tbody id="borrowered-books-table-body-returns">
+                                <!-- Data will be loaded here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+
+                <h2>还书</h2>
+                <br>
+                <div class="card">
+                    <h3>还书操作</h3>
+                    <form action="{{ url_for('returns') }}" method="post">
+                        <input type="hidden" name="return_book" value="true">
+                        <div class="form-group">
+                            <label for="card-id">借书证卡号</label>
+                            <input type="text" id="card-id" name="card_id" placeholder="请输入借书证卡号" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="book-id">书号</label>
+                            <input type="text" id="book-id" name="book_id" placeholder="请输入图书编号" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">还书</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            };
+            document.getElementById('datetime').textContent = now.toLocaleDateString('zh-CN', options);
+        }
+        
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+        
+        // Tab switching for navigation
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.section');
+        
+        navLinks.forEach(link => {
+            if (link.parentElement.classList.contains('logout')) return;
+            
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remove active class from all links and sections
+                navLinks.forEach(l => l.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+                
+                // Add active class to clicked link
+                link.classList.add('active');
+                
+                // Show corresponding section
+                const sectionId = link.getAttribute('data-section');
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
+
+        // 图书查询
+        document.addEventListener('DOMContentLoaded', function() {
+            // 页面加载时默认显示 10 条图书信息
+            loadBooks();
+
+            // 搜索按钮点击事件
+            document.getElementById('search_button').addEventListener('click', function() {
+                loadBooks();
+            });
+            
+            // 搜索框回车事件
+            document.querySelectorAll('.search-bar').forEach(function(input) {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        loadBooks();
+                    }
+                });
+            });
+
+            function loadBooks() {
+                const requestData = {
+                    title: document.getElementById('search-title').value || '',
+                    author: document.getElementById('search-author').value || '',
+                    category: document.getElementById('search-category').value || '',
+                    year_start: document.getElementById('year-start').value || '',
+                    year_end: document.getElementById('year-end').value || '',
+                    price_min: document.getElementById('price-min').value || '',
+                    price_max: document.getElementById('price-max').value || '',
+                    sort_by: document.getElementById('sort-by').value || 'title',
+                    order_by: document.getElementById('order_by').value || 'asc'
+                };
+
+                fetch('{{ url_for("search") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    //console.log('Fetched books data:', data);
+                    updateBooksTable(data);
+                })
+                .catch(error => console.error('Error fetching books:', error));
+            }
+
+            function updateBooksTable(books) {
+                const tableBody = document.getElementById('books-table-body');
+                tableBody.innerHTML = '';
+
+                if (books && books.length > 0) {
+                    books.forEach(book => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${book.book_id}</td>
+                            <td>${book.category}</td>
+                            <td>${book.title}</td>
+                            <td>${book.press}</td>
+                            <td>${book.year}</td>
+                            <td>${book.author}</td>
+                            <td>${book.price}</td>
+                            <td>${book.total_nums}</td>
+                            <td>${book.stock}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    const row = document.createElement('tr');
+                    row.innerHTML = '<td colspan="9" style="text-align: center;">无满足条件的图书</td>';
+                    tableBody.appendChild(row);
+                }
+            }
+        });
+        // 借书查询-借书
+        document.addEventListener('DOMContentLoaded', function() {
+            // 页面加载时默认显示 10 条图书信息
+            loadBooks_borrowed();
+
+            // 搜索按钮点击事件
+            document.getElementById('search_button_borrow').addEventListener('click', function() {
+                loadBooks_borrowed();
+            });
+            
+            // 搜索框回车事件
+            document.querySelectorAll('.search-bar').forEach(function(input) {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        loadBooks_borrowed();
+                    }
+                });
+            });
+
+            function loadBooks_borrowed() {
+                const requestData = {
+                    card_id: document.getElementById('search-id').value || '',
+                    sort_by: document.getElementById('sort-by').value || 'book_id',
+                    order_by: document.getElementById('order_by').value || 'asc'
+                };
+
+                fetch('{{ url_for("borrow") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    //console.log('Fetched books data:', data);
+                    updateBooksTable_borrowed(data);
+                })
+                .catch(error => console.error('Error fetching books:', error));
+            }
+
+            function updateBooksTable_borrowed(books) {
+                const tableBody = document.getElementById('borrowered-books-table-body');
+                tableBody.innerHTML = '';
+                
+                if (books && books.length > 0) {
+                    books.forEach(book => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${book.book_id}</td>
+                            <td>${book.category}</td>
+                            <td>${book.title}</td>
+                            <td>${book.press}</td>
+                            <td>${book.year}</td>
+                            <td>${book.author}</td>
+                            <td>${book.price}</td>
+                            <td>${book.total_nums}</td>
+                            <td>${book.stock}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    const row = document.createElement('tr');
+                    row.innerHTML = '<td colspan="9" style="text-align: center;">无满足条件的图书</td>';
+                    tableBody.appendChild(row);
+                }
+            }
+        });
+        // 借书查询-还书
+        document.addEventListener('DOMContentLoaded', function() {
+            // 页面加载时默认显示 10 条图书信息
+            loadBooks_borrowed_returns();
+
+            // 搜索按钮点击事件
+            document.getElementById('search_button_borrow_returns').addEventListener('click', function() {
+                loadBooks_borrowed_returns();
+            });
+            
+            // 搜索框回车事件
+            document.querySelectorAll('.search-bar').forEach(function(input) {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        loadBooks_borrowed_returns();
+                    }
+                });
+            });
+
+            function loadBooks_borrowed_returns() {
+                const requestData = {
+                    card_id: document.getElementById('search-id-returns').value || '',
+                    sort_by: document.getElementById('sort-by-returns').value || 'book_id',
+                    order_by: document.getElementById('order-by-returns').value || 'asc'
+                };
+
+                fetch('{{ url_for("returns") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    //console.log('Fetched books data:', data);
+                    updateBooksTable_borrowed_returns(data);
+                })
+                .catch(error => console.error('Error fetching books:', error));
+            }
+
+            function updateBooksTable_borrowed_returns(books) {
+                const tableBody = document.getElementById('borrowered-books-table-body-returns');
+                tableBody.innerHTML = '';
+                
+                if (books && books.length > 0) {
+                    books.forEach(book => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${book.book_id}</td>
+                            <td>${book.category}</td>
+                            <td>${book.title}</td>
+                            <td>${book.press}</td>
+                            <td>${book.year}</td>
+                            <td>${book.author}</td>
+                            <td>${book.price}</td>
+                            <td>${book.total_nums}</td>
+                            <td>${book.stock}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    const row = document.createElement('tr');
+                    row.innerHTML = '<td colspan="9" style="text-align: center;">无满足条件的图书</td>';
+                    tableBody.appendChild(row);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
