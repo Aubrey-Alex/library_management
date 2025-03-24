@@ -1,78 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>登录</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_login.css') }}">
+    <link rel="stylesheet" href="static/css/style_login.css" />
     <style>
-        .hidden {
-            display: none;
-        }
+      .hidden {
+        display: none;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <section>
-        <div class="color"></div>
-        <div class="color"></div>
-        <div class="color"></div>
-        <div class="box">
-            <div class="square" style="--i:0;"></div>
-            <div class="square" style="--i:1;"></div>
-            <div class="square" style="--i:2;"></div>
-            <div class="square" style="--i:3;"></div>
-            <div class="square" style="--i:4;"></div>
-            <div class="container">
-                <div class="form">
-                    <h2>图书管理系统</h2>
-                    <form method="POST" action="{{ url_for('index') }}">
-                        <div class="inputBox">
-                            <select id="role" name="role" required>
-                                <option value="admin">管理员</option>
-                                <option value="student">学生</option>
-                                <option value="teacher">老师</option>
-                                <option value="guest">校外人员</option>
-                            </select>
-                        </div>
-                        <div class="inputBox" id="adminIdField">
-                            <input type="text" name="admin_id" placeholder="管理员ID">
-                        </div>
-                        <div class="inputBox" id="passwordField">
-                            <input type="password" name="password" placeholder="密码">
-                        </div>
-                        <div class="inputBox">
-                            <input type="submit" value="登录">
-                        </div>
-                    </form>
-                </div>
-            </div>
+      <div class="color"></div>
+      <div class="color"></div>
+      <div class="color"></div>
+      <div class="box">
+        <div class="square" style="--i: 0"></div>
+        <div class="square" style="--i: 1"></div>
+        <div class="square" style="--i: 2"></div>
+        <div class="square" style="--i: 3"></div>
+        <div class="square" style="--i: 4"></div>
+        <div class="container">
+          <div class="form">
+            <h2>图书管理系统</h2>
+            <form method="POST" action="{{ url_for('index') }}">
+              <div class="inputBox">
+                <select id="role" name="role" required>
+                  <option value="admin">管理员</option>
+                  <option value="student">学生</option>
+                  <option value="teacher">老师</option>
+                  <option value="guest">校外人员</option>
+                </select>
+              </div>
+              <div class="inputBox" id="adminIdField">
+                <input type="text" name="admin_id" placeholder="管理员ID" />
+              </div>
+              <div class="inputBox" id="passwordField">
+                <input type="password" name="password" placeholder="密码" />
+              </div>
+              <div class="inputBox">
+                <input type="submit" value="登录" />
+              </div>
+            </form>
+          </div>
         </div>
+      </div>
     </section>
 
     <script>
-        // 获取元素
-        const roleSelect = document.getElementById('role');
-        const adminIdField = document.getElementById('adminIdField');
-        const passwordField = document.getElementById('passwordField');
+      // 获取元素
+      const roleSelect = document.getElementById("role");
+      const adminIdField = document.getElementById("adminIdField");
+      const passwordField = document.getElementById("passwordField");
 
-        // 切换登录字段显示状态的函数
-        function toggleLoginFields() {
-            const role = roleSelect.value;
-            if (role === 'admin') {
-                adminIdField.classList.remove('hidden');
-                passwordField.classList.remove('hidden');
-            } else {
-                adminIdField.classList.add('hidden');
-                passwordField.classList.add('hidden');
-            }
+      // 切换登录字段显示状态的函数
+      function toggleLoginFields() {
+        const role = roleSelect.value;
+        if (role === "admin") {
+          adminIdField.classList.remove("hidden");
+          passwordField.classList.remove("hidden");
+        } else {
+          adminIdField.classList.add("hidden");
+          passwordField.classList.add("hidden");
         }
+      }
 
-        // 监听角色选择的变化
-        roleSelect.addEventListener('change', toggleLoginFields);
+      // 监听角色选择的变化
+      roleSelect.addEventListener("change", toggleLoginFields);
 
-        window.onload = function() {
-            toggleLoginFields();
-        };
+      window.onload = function () {
+        toggleLoginFields();
+      };
     </script>
-</body>
+  </body>
 </html>
