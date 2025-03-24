@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图书管理系统 - 管理员面板</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_admin.css') }}">
+</head>
+<body>
+    <!-- Sidebar navigation -->
+    <div class="sidebar">
+        <div class="logo">
+            <h2>图书管理系统</h2>
+            <p>管理员面板</p>
+        </div>
+        
+        <div class="nav-links">
+            <a href="#" class="nav-link active" data-section="add-book">
+                <i>📚</i>
+                <span>图书入库</span>
+            </a>
+            <a href="#" class="nav-link" data-section="manage-borrowers">
+                <i>👥</i>
+                <span>借书证管理</span>
+            </a>
+            
+            <div class="logout">
+                <a href="{{ url_for('logout') }}" class="nav-link">
+                    <i>🚪</i>
+                    <span>退出登录</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main content area -->
+    <div class="main-content">
+        <div class="header">
+            <h1>欢迎回来，管理员</h1>
+            <div class="date-time" id="datetime"></div>
+        </div>
+        
+        <!-- Add Book Section -->
+        <div class="content-area">
+            <div class="section active" id="add-book">
+                <h2>图书入库</h2>
+                <br>
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="label">总藏书量</div>
+                        <div class="value">
+                            <span>{{ total_books }}</span>
+                        </div>
+                        <div class="label">册</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">在借图书</div>
+                        <div class="value">
+                            <span>{{ borrowed_books }}</span>
+                        </div>
+                        <div class="label">册</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">累计借阅</div>
+                        <div class="value">
+                            <span>{{ accumulated_borrowed_books }}</span>
+                        </div>
+                        <div class="label">册</div>
+                    </div>
+                </div>
+                
+                <div class="tabs">
+                    <div class="tab active" data-tab="single">单本录入</div>
+                    <div class="tab" data-tab="batch">批量导入</div>
+                </div>
+                
+                <div class="tab-content active" id="single">
+                    <div class="card">
+                        <h3>添加新图书</h3>
+                        <form action="{{ url_for('route_add_book') }}" method="post">
+                            <div class="form-group">
+                                <label for="book-title">书名</label>
+                                <input type="text" id="book-title" name="title" placeholder="请输入书名" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="book-author">作者</label>
+                                <input type="text" id="book-author" name="author" placeholder="请输入作者" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="book-press">出版社</label>
+                                <input type="text" id="book-press" name="press" placeholder="请输入出版社" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="book-year">年份</label>
+                                <input type="text" id="book-year" name="year" placeholder="请输入年份" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="book-category">分类</label>
+                                <select id="book-category" name="category" required>
+                                    <option value="" disabled selected hidden>请选择分类</option>
+                                    <option value="哲学、宗教">哲学、宗教</option>
+                                    <option value="社会科学总论">社会科学总论</option>
+                                    <option value="政治、法律">政治、法律</option>
+                                    <option value="军事">军事</option>
+                                    <option value="经济">经济</option>
+                                    <option value="文化、科学、教育、体育">文化、科学、教育、体育</option>
+                                    <option value="语言、文字">语言、文字</option>
+                                    <option value="文学">文学</option>
+                                    <option value="艺术">艺术</option>
+                                    <option value="历史、地理">历史、地理</option>
+                                    <option value="自然科学总论">自然科学总论</option>
+                                    <option value="数理科学和化学">数理科学和化学</option>
+                                    <option value="天文学、地球科学">天文学、地球科学</option>
+                                    <option value="生物科学">生物科学</option>
+                                    <option value="医药、卫生">医药、卫生</option>
+                                    <option value="农业科学">农业科学</option>
+                                    <option value="工业技术">工业技术</option>
+                                    <option value="交通运输">交通运输</option>
+                                    <option value="航空、航天">航空、航天</option>
+                                    <option value="环境科学、安全科学">环境科学、安全科学</option>
+                                    <option value="综合性图书">综合性图书</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="book-price">价格</label>
+                                <input type="number" id="book-price" name="price" placeholder="请输入价格" step="0.01" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="book-copies">数量</label>
+                                <input type="number" id="book-copies" name="copies" placeholder="请输入数量" value="1" required>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">提交图书信息</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="batch">
+                    <div class="card">
+                        <h3>批量导入图书</h3>
+                        <form action="{{ url_for('batch_import') }}" method="post" enctype="multipart/form-data">
+                            <div class="file-upload" id="file-upload-area">
+                                <i>📁</i>
+                                <p>点击或拖拽文件到此处</p>
+                                <p>支持 .txt, .docx 格式</p>
+                                <input type="file" id="file-upload" name="book_file" accept=".txt, .docx" required>
+                            </div>
+                            
+                            <div id="file-name" style="margin-bottom: 15px; text-align: center; display: none;">
+                                <p>已选择: <span id="selected-file-name"></span></p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>导入说明</label>
+                                <p style="margin-bottom: 15px; color: #555;">请确保上传的文件格式符合要求，文件中应包含以下列：书名、作者、出版社、年份、分类、价格、数量，每行一条数据。</p>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">开始导入</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Manage Borrowers Section -->
+            <div class="section" id="manage-borrowers">
+                <h2>借书证管理</h2>
+                <br>
+                <form action="{{ url_for('manage_borrowers') }}" method="POST">
+                    <input type="hidden" name="search_borrower" value="true">
+                    <div class="search-bar">
+                        <input type="text" id="search_borrower_name" placeholder="搜索借书证持有人姓名" name="search_borrower_name">
+                        <button type="button" id="search_button" name="is_search" value="true">🔍</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>借书证列表</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>持有人</th>
+                                    <th>单位</th>
+                                    <th>类别</th>
+                                </tr>
+                            </thead>
+                            <tbody id="borrowers-table-body">
+                                <!-- Data will be loaded here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+
+                
+                <div class="card">
+                    <h3>添加借书证</h3>
+                    <form action="{{ url_for('manage_borrowers') }}" method="post">
+                        <input type="hidden" name="insert_borrower" value="true">
+                        <div class="form-group">
+                            <label for="borrower-name">姓名</label>
+                            <input type="text" id="borrower-name" name="name" placeholder="请输入姓名" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="borrower-workplace">工作单位</label>
+                            <input type="text" id="borrower-workplace" name="workplace" placeholder="请输入工作单位" required>
+                        </div>
+                        
+                        <div class="form-group">
+                        <label for="borrower-category">类别</label>
+                            <select id="borrower-category" name="borrower-category" required>
+                                <option value="学生">学生</option>
+                                <option value="教师">教师</option>
+                                <option value="职工">职工</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">创建借书证</button>
+                        </div>
+                    </form>
+                </div>
+                <br>
+                <div class="card">
+                    <h3>删除借书证</h3>
+                    <form action="{{ url_for('manage_borrowers') }}" method="post">
+                        <input type="hidden" name="delete_borrower" value="true"> 
+                        <div class="form-group">
+                            <label for="borrower-id">借书证号</label>
+                            <input type="text" id="borrower-id" name="card_id" placeholder="请输入借书证号" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="borrower-name">姓名</label>
+                            <input type="text" id="borrower-name" name="name" placeholder="请输入姓名" required>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">删除借书证</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            };
+            document.getElementById('datetime').textContent = now.toLocaleDateString('zh-CN', options);
+        }
+        
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+        
+        // Tab switching for navigation
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.section');
+        
+        navLinks.forEach(link => {
+            if (link.parentElement.classList.contains('logout')) return;
+            
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remove active class from all links and sections
+                navLinks.forEach(l => l.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+                
+                // Add active class to clicked link
+                link.classList.add('active');
+                
+                // Show corresponding section
+                const sectionId = link.getAttribute('data-section');
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
+        
+        // Tab switching for book entry
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and contents
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Show corresponding content
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // File upload handling
+        const fileUploadArea = document.getElementById('file-upload-area');
+        const fileInput = document.getElementById('file-upload');
+        const fileNameDisplay = document.getElementById('file-name');
+        const selectedFileName = document.getElementById('selected-file-name');
+        
+        fileUploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                selectedFileName.textContent = fileInput.files[0].name;
+                fileNameDisplay.style.display = 'block';
+            } else {
+                fileNameDisplay.style.display = 'none';
+            }
+        });
+        
+        // Drag and drop handling
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = '#7eb3ff';
+            fileUploadArea.style.background = 'rgba(255, 255, 255, 0.7)';
+        });
+        
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.style.borderColor = 'rgba(126, 179, 255, 0.5)';
+            fileUploadArea.style.background = 'rgba(255, 255, 255, 0.5)';
+        });
+        
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = 'rgba(126, 179, 255, 0.5)';
+            fileUploadArea.style.background = 'rgba(255, 255, 255, 0.5)';
+            
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                selectedFileName.textContent = fileInput.files[0].name;
+                fileNameDisplay.style.display = 'block';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load default data when page loads
+            loadBorrowers();
+            
+            // Set up search button click handler
+            document.getElementById('search_button').addEventListener('click', function() {
+                loadBorrowers();
+            });
+            
+            // Handle enter key in search box
+            document.getElementById('search_borrower_name').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    loadBorrowers();
+                }
+            });
+            
+            function loadBorrowers() {
+                const searchName = document.getElementById('search_borrower_name').value;
+                
+                // Create request data
+                const requestData = {
+                    search_borrower: true,
+                    search_name: searchName
+                };
+                
+                // Send AJAX request
+                fetch('{{ url_for("manage_borrowers") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    updateBorrowersTable(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching borrowers:', error);
+                });
+            }
+            
+            function updateBorrowersTable(borrowers) {
+                const tableBody = document.getElementById('borrowers-table-body');
+                tableBody.innerHTML = '';
+                
+                if (borrowers && borrowers.length > 0) {
+                    borrowers.forEach(borrower => {
+                        const row = document.createElement('tr');
+                        
+                        row.innerHTML = `
+                            <td>${borrower.card_id}</td>
+                            <td>${borrower.name}</td>
+                            <td>${borrower.workplace}</td>
+                            <td>${borrower.type}</td>
+                        `;
+                        
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    const row = document.createElement('tr');
+                    row.innerHTML = '<td colspan="4" style="text-align: center;">无满足条件的借书证</td>';
+                    tableBody.appendChild(row);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
