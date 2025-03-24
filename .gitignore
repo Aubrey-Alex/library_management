@@ -1,0 +1,4 @@
+temp_restore/
+templates/
+test/
+__pycache__/
