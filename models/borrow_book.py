@@ -1,5 +1,5 @@
 from utils.db_connector import DBConnector
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def get_borrowed_books(card_id, sort_by='title', order_by='asc'):
     """
@@ -67,6 +67,18 @@ def borrow_book(card_id, book_id):
     db.connect()
 
     try:
+        # 检查该书是否存在
+        query = "SELECT * FROM books WHERE book_id = ?"
+        result = db.execute_query(query, (book_id,))
+        if not result:
+            return "借书失败：本图书馆未收录此书籍，请联系管理员。"
+
+        # 检查是否已经正在借阅该本书籍
+        query = "SELECT * FROM borrow_records WHERE card_id = ? AND book_id = ? AND return_date IS NULL"
+        result = db.execute_query(query, (card_id, book_id))
+        if result:
+            return "您已经借阅该书籍，请勿重复借阅。"
+            
         # 检查库存
         query = "SELECT stock FROM books WHERE book_id = ?"
         stock = db.execute_query(query, (book_id,))[0][0]
@@ -99,22 +111,20 @@ def borrow_book(card_id, book_id):
                 admin_id = 4
             db.execute_insert(borrow, (next_id, book_id, card_id, borrow_date, admin_id)) 
 
-            print("借书成功！")
-            return True
+            return "借书成功！"
         else:
             # 查询最近归还时间
             return_query = """
-            SELECT MAX(return_date) FROM borrow_records WHERE book_id = ?
+            SELECT MIN(borrow_date) FROM borrow_records WHERE book_id = ? AND return_date IS NULL
             """
             return_date = db.execute_query(return_query, (book_id,))[0][0]
+            return_date = return_date + timedelta(days=30)
             if return_date:
-                print(f"该书无库存，最近归还时间为：{return_date}")
+                return(f"该书无库存，最近归还时间为：{return_date}")
             else:
-                print("该书无库存，且无归还记录。")
-            return False
+                return "该书无库存，请联系管理员。"
     except Exception as e:
-        print("借书失败：", e)
-        return False
+        return ("借书失败:", e)
     finally:
         # 关闭数据库连接
         db.close()

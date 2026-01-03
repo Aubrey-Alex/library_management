@@ -58,12 +58,11 @@ def return_book(card_id, book_id):
             """
             return_date = datetime.now().strftime("%Y-%m-%d")
             db.execute_update(return_query, (return_date, card_id, book_id))
-            return True
+            return (f"还书成功！归还日期：{return_date}，欢迎下次借阅。")
         else:
-            return False
+            return "还书失败：您未借阅该书籍。"
     except Exception as e:
-        print("还书失败：", e)
-        return False
+        return ("还书失败:", e)
     finally:
         # 关闭数据库连接
         db.close()

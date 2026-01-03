@@ -17,7 +17,7 @@ def insert_borrower(name, workplace, type):
         params = (name, workplace, type)
         result = db.execute_query(query, params)
         if len(result) > 0:
-            return
+            return "新增借书证失败：该借书证已存在"
         # 如果没有该借书证，则插入新借书证
         max_card_id_query = "SELECT MAX(card_id) FROM borrowers"
         result = db.execute_query(max_card_id_query)
@@ -27,17 +27,16 @@ def insert_borrower(name, workplace, type):
             card_id = 1
         # SQL 插入语句
         insert = "INSERT INTO borrowers (card_id, name, workplace, type) VALUES (?,?,?,?)"
-        print("新增借书证：", insert, (card_id, name, workplace, type))
+        # print("新增借书证：", insert, (card_id, name, workplace, type))
         # 执行插入
         db.execute_insert(insert, (card_id, name, workplace, type))
     except Exception as e:
-        print("新增借书证失败:", e)
-        return False
+        return("新增借书证失败:", e)
     finally:
         # 关闭数据库连接
         db.close()
 
-    return True
+    return "新增借书证成功"
 
 def delete_borrower(card_id, name):
     """
@@ -55,7 +54,14 @@ def delete_borrower(card_id, name):
         params = (card_id, name)
         result = db.execute_query(query, params)
         if len(result) == 0:
-            return
+            return "删除借书证失败：该借书证不存在"
+
+        # 如果正在借阅某本书籍，则不能删除该借书证
+        query = "SELECT * FROM borrow_records WHERE card_id = ? AND return_date IS NULL"
+        params = (card_id,)
+        result = db.execute_query(query, params)
+        if len(result) > 0:
+            return "删除借书证失败：该借书证正在借阅图书，请先归还图书后再删除"
 
         # SQL 删除语句
         delete = "DELETE FROM borrowers WHERE card_id = ?"
@@ -63,11 +69,11 @@ def delete_borrower(card_id, name):
         # 执行删除
         db.execute_delete(delete, (card_id,))
     except Exception as e:
-        print("删除借书证失败:", e)
-        return False
+        return("删除借书证失败:", e)
     finally:
         # 关闭数据库连接
         db.close()
+    return "删除借书证成功"
 
 def search_borrowers(name):
     """
