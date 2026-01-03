@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify  
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
 from utils.db_connector import DBConnector
 from utils.administrator_login import administrator_login
 from models.search_book import default_books, search_books
@@ -23,7 +23,8 @@ def index():
                 session['admin_id'] = admin_id  # 将管理员ID存入会话
                 return redirect(url_for('admin_dashboard'))  # 跳转到管理员面板
             else:
-                return "登录失败，请检查管理员ID和密码。"
+                flash('用户名或密码错误！')  # 显示错误信息
+                return redirect(url_for('index'))  # 使用重定向
         else:
             return redirect(url_for('user_dashboard'), code=307)  # 跳转到首页
     return render_template('index.html')
@@ -37,12 +38,13 @@ def admin_dashboard():
         accumulated_borrowed_books = accumulated_borrowed_books_query()
         return render_template('admin_dashboard.html', total_books=total_books, borrowed_books=borrowed_books, accumulated_borrowed_books=accumulated_borrowed_books)
     else:
-        return redirect(url_for('login'))  # 未登录则跳转到登录页面
+        flash('请先登录！休想直接进入管理员面板！')
+        return redirect(url_for('index'))  # 未登录则跳转到登录页面
 
 # 退出登录
 @app.route('/logout')
 def logout():
-    session.pop('admin_id', None)  # 清除会话中的管理员ID
+    session.clear()  # 清除会话数据
     return redirect(url_for('index'))  # 跳转到登录页面
 
 # 用户面板
@@ -64,6 +66,7 @@ def route_add_book():
             "total_nums": request.form['copies']
         }
         add_book(book_info)
+        flash('图书入库成功！')  # 显示成功信息
         return redirect(url_for('admin_dashboard'))  # 跳转到管理员面板
     return render_template('index.html')
 
@@ -74,6 +77,7 @@ def batch_import():
         file = request.files['book_file']
         if file:
             add_books(file)
+            flash('批量导入成功！')  # 显示成功信息
             return redirect(url_for('admin_dashboard'))  # 跳转到管理员面板
     return redirect(url_for('admin_dashboard'))
 
@@ -85,19 +89,20 @@ def manage_borrowers():
             name = request.form['name']
             workplace = request.form['workplace']
             type = request.form['borrower-category']
-            insert_borrower(name, workplace, type)
+            message = insert_borrower(name, workplace, type)
+            flash(message)  # 显示成功信息或失败信息
         elif "delete_borrower" in request.form:
             card_id = request.form['card_id']
             name = request.form['name']
-            delete_borrower(card_id, name)
+            message = delete_borrower(card_id, name)
+            flash(message)  # 显示成功信息或失败信息
         elif "search_borrower" in request.form or request.is_json:
             # Handle AJAX requests for search or default data
             if request.is_json:
                 data = request.get_json()
                 name = data.get('search_borrower_name', '')
             else:
-                name = request.form.get('search_borrower_name', '')
-            
+                name = request.form.get('search_borrower_name', '')            
             if name:
                 # Search borrowers by name
                 borrowers = search_borrowers(name)
@@ -156,12 +161,16 @@ def borrow():
             if request.is_json:
                 data = request.get_json()
                 card_id = data.get('card_id', '')
-                sort_by = data.get('sort_by', 'title')
-                order_by = data.get('order_by', 'asc')
+                sort_by = data.get('sort_by_borrow', 'title')
+                order_by = data.get('order_by_borrow', 'asc')
             else:
                 card_id = request.form.get('card_id', '')
-                sort_by = request.form.get('sort_by', 'title')
-                order_by = request.form.get('order_by', 'asc')
+                sort_by = request.form.get('sort_by_borrow', 'title')
+                order_by = request.form.get('order_by_borrow', 'asc')
+
+            print("card_id:", data.get('card_id'))
+            print("sort_by:", data.get('sort_by_borrow'))
+            print("order_by:", data.get('order_by_borrow'))
             
             if card_id:
                 # Search borrowed books by card ID
@@ -179,7 +188,8 @@ def borrow():
         elif "borrow_book" in request.form:
             card_id = request.form['card_id']
             book_id = request.form['book_id']
-            borrow_book(card_id, book_id)
+            message = borrow_book(card_id, book_id)
+            flash(message)  # 显示成功信息或失败信息
             return redirect(url_for('user_dashboard'))
     return redirect(url_for('user_dashboard'))
         
@@ -215,7 +225,8 @@ def returns():
         elif "return_book" in request.form:
             card_id = request.form['card_id']
             book_id = request.form['book_id']
-            print("还书结果：", return_book(card_id, book_id))
+            message = return_book(card_id, book_id)
+            flash(message)  # 显示成功信息或失败信息
             return redirect(url_for('user_dashboard'))
     return redirect(url_for('user_dashboard'))
 
